@@ -1,12 +1,12 @@
 import { Schema, model, models } from "mongoose";
-import Counter from "./Counter";
 
 const CollegeSchema = new Schema(
   {
+    collegeId: { type: String, required: true, unique: true },
     name: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     address: { type: String, required: true },
-    emailPrefix: { type: String, required: true, unique: true },
+    password: { type: String, required: false },
   },
   { timestamps: true }
 );
@@ -21,7 +21,7 @@ const StudentSchema = new Schema(
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
 
-    password: { type: String, required: false, default: "" }, // 🔹 Password can be empty
+    password: { type: String, required: false, default: "" },
 
     parentEmail: { type: String, required: true },
     parentPhone: { type: String, required: true },
@@ -33,26 +33,14 @@ const StudentSchema = new Schema(
     semester: { type: Number, required: true },
     section: { type: String },
     role: { type: String, default: "student" },
+    collegeId: { type: String, required: true },
   },
   { timestamps: true }
 );
 
 const Student = models.Student || model("Student", StudentSchema);
 
-StudentSchema.pre("save", async function (next) {
-  if (!this.studentId) {
-    const counter = await Counter.findByIdAndUpdate(
-      { _id: "studentId" },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    this.studentId = counter!.seq;
-  }
-  next();
-});
-
 // Teacher Schema
-
 const TeacherSchema = new Schema(
   {
     teacherId: { type: String, required: true, unique: true },
@@ -61,8 +49,9 @@ const TeacherSchema = new Schema(
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: false, default: "" },
     department: { type: String, required: true },
-    position: { type: String, required: true }, // e.g., HOD, Professor, Coordinator
+    position: { type: String, required: true },
     role: { type: String, default: "teacher" },
+    collegeId: { type: String, required: true },
   },
   { timestamps: true }
 );
@@ -74,9 +63,9 @@ const DoctorSchema = new Schema(
     doctorId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     role: { type: String, default: "doctor" },
-    collegeId: { type: Schema.Types.ObjectId, ref: "College", required: true },
+    collegeId: { type: String, required: true },
   },
   { timestamps: true }
 );

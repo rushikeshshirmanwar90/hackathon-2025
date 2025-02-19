@@ -6,7 +6,10 @@ import connect from "@/lib/db";
 // Function to generate the next sequential studentId
 const generateStudentId = async (): Promise<string> => {
   const lastStudent = await Student.findOne().sort({ studentId: -1 });
-  const lastId = lastStudent ? parseInt(lastStudent.studentId, 10) : 0;
+
+  // Start from 1000 if no students exist
+  const lastId = lastStudent ? parseInt(lastStudent.studentId, 10) : 999;
+
   return (lastId + 1).toString();
 };
 
@@ -123,7 +126,7 @@ export const PATCH = async (req: NextRequest) => {
 
     const updatedStudent = await Student.findOneAndUpdate(
       { studentId },
-      { $set: updatedData },
+      { ...updatedData, password: "" },
       { new: true }
     );
 

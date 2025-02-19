@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { College } from "@/lib/models/user-model";
 import connect from "@/lib/db";
 
+// Function to generate the next sequential teacherId
+const generateCollegeId = async (): Promise<string> => {
+  const lastCollege = await College.findOne().sort({ collegeId: -1 });
+  const lastId = lastCollege ? parseInt(lastCollege.collegeId, 10) : 0;
+  return (lastId + 1).toString();
+};
+
 // 📌 GET Request - Fetch All Colleges or a Single College by ID
 export const GET = async (req: NextRequest) => {
   try {
@@ -34,8 +41,14 @@ export const POST = async (req: NextRequest) => {
   try {
     await connect();
     const body = await req.json();
+    const newCollegeId = await generateCollegeId();
 
-    const newCollege = new College(body);
+    const newCollege = await new College({
+      collegeId: newCollegeId,
+      ...body,
+      password: "", // Password remains empty during registration
+    });
+
     await newCollege.save();
 
     return NextResponse.json(newCollege, { status: 201 });
@@ -64,7 +77,7 @@ export const PUT = async (req: NextRequest) => {
 
     const updatedCollege = await College.findByIdAndUpdate(
       collegeId,
-      updatedData,
+      { ...updatedData, password: "" },
       { new: true }
     );
 
@@ -99,6 +112,7 @@ export const DELETE = async (req: NextRequest) => {
     }
 
     const deletedCollege = await College.findByIdAndDelete(collegeId);
+    // const deletedCollege = await College.dele();
 
     if (!deletedCollege) {
       return NextResponse.json(

@@ -9,6 +9,7 @@ const generateTeacherId = async (): Promise<string> => {
   return (lastId + 1).toString();
 };
 
+
 // 📌 GET Request - Fetch All Teachers or a Single Teacher by ID
 export const GET = async (req: NextRequest) => {
   try {
@@ -50,7 +51,7 @@ export const POST = async (req: NextRequest) => {
     const teacher = new Teacher({
       teacherId: newTeacherId,
       ...body,
-      password: "", // Password remains empty during registration
+      password: "",
     });
 
     const newTeacher = await teacher.save();
@@ -81,7 +82,7 @@ export const PUT = async (req: NextRequest) => {
 
     const updatedTeacher = await Teacher.findOneAndUpdate(
       { teacherId },
-      { ...updatedData, password: "" }, // Password remains unchanged
+      { ...updatedData, password: "" },
       { new: true }
     );
 
@@ -119,9 +120,11 @@ export const PATCH = async (req: NextRequest) => {
       );
     }
 
+    const { password, ...dataWithoutPassword } = updatedData;
+
     const updatedTeacher = await Teacher.findOneAndUpdate(
       { teacherId },
-      { $set: updatedData },
+      { $set: dataWithoutPassword },
       { new: true }
     );
 

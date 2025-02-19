@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { Doctor } from "@/lib/models/user-model";
 import connect from "@/lib/db";
 
-// Function to generate the next sequential teacherId
+// Function to generate the next sequential doctorId
 const generateDoctorId = async (): Promise<string> => {
   const lastDoctor = await Doctor.findOne().sort({ doctorId: -1 });
   const lastId = lastDoctor ? parseInt(lastDoctor.doctorId, 10) : 0;
@@ -49,7 +48,7 @@ export const POST = async (req: NextRequest) => {
     const newDoctorId = await generateDoctorId();
 
     const doctor = await new Doctor({
-      DoctorId: newDoctorId,
+      doctorId: newDoctorId,
       ...body,
       password: "", // Password remains empty during registration
     });
@@ -59,7 +58,7 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json(newDoctor, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
-      { message: "Error: Unable to register student", error: error.message },
+      { message: "Error: Unable to register Doctor", error: error.message },
       { status: 500 }
     );
   }
@@ -80,9 +79,11 @@ export const PUT = async (req: NextRequest) => {
       );
     }
 
+    const { password, ...noPasswordData } = updatedData;
+
     const updatedDoctor = await Doctor.findOneAndUpdate(
       { doctorId },
-      { ...updatedData, password: "" }, // Password remains unchanged
+      { ...noPasswordData, password: "" }, // Password remains unchanged
       { new: true }
     );
 
@@ -106,7 +107,6 @@ export const PUT = async (req: NextRequest) => {
 };
 
 // 📌 PATCH Request - Partially Update a Doctor (Only Specific Fields)
-
 export const PATCH = async (req: NextRequest) => {
   try {
     await connect();
