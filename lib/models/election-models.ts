@@ -4,7 +4,8 @@ const ElectionSchema = new Schema({
   title: { type: String, required: true },
   candidates: [
     {
-      studentId: { type: Schema.Types.ObjectId, ref: "Student" },
+      position: { type: String, required: true },
+      studentId: { type: String, required: true },
       votes: { type: Number, default: 0 },
     },
   ],
@@ -18,24 +19,24 @@ const ElectionSchema = new Schema({
 
 const Election = models.Election || model("Election", ElectionSchema);
 
-const VoteSchema = new Schema({
-  electionId: {
-    type: Schema.Types.ObjectId,
-    ref: "Election",
-    required: true,
+const VoteSchema = new Schema(
+  {
+    electionId: {
+      type: Schema.Types.ObjectId,
+      ref: "Election",
+      required: true,
+    },
+    studentId: {
+      type: String,
+      required: true,
+    },
+    candidateId: {
+      type: String,
+      required: true,
+    },
   },
-  studentId: {
-    type: Schema.Types.ObjectId,
-    ref: "Student",
-    required: true,
-  },
-  candidateId: {
-    type: Schema.Types.ObjectId,
-    ref: "Student",
-    required: true,
-  },
-  createdAt: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+);
 
 const Vote = models.Vote || model("Vote", VoteSchema);
 

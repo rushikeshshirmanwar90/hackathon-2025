@@ -11,10 +11,10 @@ export const POST = async (req: NextRequest) => {
     const election = await Election.findById(electionId);
     if (!election || election.status !== "active") {
       return NextResponse.json(
-        { message: "Election is not active" },
+        { message: "Election is not active or the election has completed" },
         { status: 400 }
       );
-    }
+    } 
 
     // Check if the student has already voted
     const existingVote = await Vote.findOne({ electionId, studentId });
