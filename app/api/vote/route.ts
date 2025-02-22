@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import { Vote } from "@/lib/models/election-models";
 import { Election } from "@/lib/models/election-models";
-
 export const POST = async (req: NextRequest) => {
   try {
     await connectToDatabase();
-    const { electionId, studentId, candidateId } = await req.json();
+    const { electionId, studentId, candidateId, positionId } = await req.json();
 
     const election = await Election.findById(electionId);
     if (!election || election.status !== "active") {
@@ -14,10 +13,27 @@ export const POST = async (req: NextRequest) => {
         { message: "Election is not active or the election has completed" },
         { status: 400 }
       );
-    } 
+    }
+
+    const validCandidate = election.candidates.find(
+      (candidate: any) =>
+        candidate.positionId.toString() === positionId &&
+        candidate.studentId === candidateId
+    );
+
+    if (!validCandidate) {
+      return NextResponse.json(
+        { message: "Invalid candidate for this position" },
+        { status: 400 }
+      );
+    }
 
     // Check if the student has already voted
-    const existingVote = await Vote.findOne({ electionId, studentId });
+    const existingVote = await Vote.findOne({
+      electionId,
+      studentId,
+      positionId,
+    });
     if (existingVote) {
       return NextResponse.json(
         { message: "You have already voted" },
@@ -26,13 +42,28 @@ export const POST = async (req: NextRequest) => {
     }
 
     // Add vote to the database
-    const newVote = new Vote({ electionId, studentId, candidateId });
+    const newVote = new Vote({
+      electionId,
+      studentId,
+      candidateId,
+      positionId,
+    });
     await newVote.save();
 
-    // Increment vote count for the candidate
     await Election.findOneAndUpdate(
-      { _id: electionId, "candidates.studentId": candidateId },
-      { $inc: { "candidates.$.votes": 1, totalVotes: 1 } }
+      {
+        _id: electionId,
+        candidates: {
+          $elemMatch: { studentId: candidateId },
+        },
+      },
+      {
+        $inc: {
+          "candidates.$.votes": 1,
+          totalVotes: 1,
+        },
+      },
+      { new: true }
     );
 
     return NextResponse.json(

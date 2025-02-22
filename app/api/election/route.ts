@@ -7,10 +7,15 @@ export const POST = async (req: NextRequest) => {
     await connect();
     const body = await req.json();
 
+    const formattedCandidates = body.candidates.map((candidate: any) => ({
+      positionId: candidate.positionId, // Store position as positionId
+      studentId: candidate.studentId,
+      votes: candidate.votes || 0,
+    }));
+
     const newElection = new Election({
-      title: body.title,
-      candidates: body.candidates, // Array of studentId
-      status: "pending",
+      ...body,
+      candidates: formattedCandidates, // Use the formatted candidates
     });
 
     const savedElection = await newElection.save();
@@ -36,7 +41,7 @@ export const GET = async (req: NextRequest) => {
         "candidates.studentId"
       );
     } else {
-      electionData = await Election.find().populate("candidates.studentId");
+      electionData = await Election.find();
     }
 
     if (!electionData) {

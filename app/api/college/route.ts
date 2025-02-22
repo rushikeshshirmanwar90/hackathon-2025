@@ -9,7 +9,6 @@ const generateCollegeId = async (): Promise<string> => {
   return (lastId + 1).toString();
 };
 
-// 📌 GET Request - Fetch All Colleges or a Single College by ID
 export const GET = async (req: NextRequest) => {
   try {
     await connect();
@@ -36,7 +35,6 @@ export const GET = async (req: NextRequest) => {
   }
 };
 
-// 📌 POST Request - Add a New College
 export const POST = async (req: NextRequest) => {
   try {
     await connect();
@@ -46,7 +44,7 @@ export const POST = async (req: NextRequest) => {
     const newCollege = await new College({
       collegeId: newCollegeId,
       ...body,
-      password: "", // Password remains empty during registration
+      password: "",
     });
 
     await newCollege.save();
@@ -60,7 +58,6 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
-// 📌 PUT Request - Update College Data
 export const PUT = async (req: NextRequest) => {
   try {
     await connect();

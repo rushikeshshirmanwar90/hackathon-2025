@@ -50,7 +50,6 @@ const TeacherSchema = new Schema(
     password: { type: String, required: false, default: "" },
     department: { type: String, required: true },
     position: { type: String, required: true },
-    role: { type: String, default: "teacher" },
     collegeId: { type: String, required: true },
   },
   { timestamps: true }
@@ -63,8 +62,8 @@ const DoctorSchema = new Schema(
     doctorId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
     password: { type: String, required: false },
-    role: { type: String, default: "doctor" },
     collegeId: { type: String, required: true },
   },
   { timestamps: true }
@@ -72,4 +71,15 @@ const DoctorSchema = new Schema(
 
 const Doctor = models.Doctor || model("Doctor", DoctorSchema);
 
-export { College, Student, Teacher, Doctor };
+const DepartmentSchema = new Schema({
+  collegeId: { type: String, required: true },
+  head: { type: String, required: true }, // teacher id
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
+const Department = models.Department || model("Department", DepartmentSchema);
+
+export { College, Student, Teacher, Doctor, Department };

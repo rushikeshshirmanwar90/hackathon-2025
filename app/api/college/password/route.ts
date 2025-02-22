@@ -42,6 +42,5 @@ export const PATCH = async (req: NextRequest) => {
       { message: "Error: Unable to generate password", error: error.message },
       { status: 500 }
     );
-    }
-
+  }
 };
